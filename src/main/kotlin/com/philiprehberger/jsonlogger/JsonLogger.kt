@@ -23,46 +23,62 @@ public class JsonLogger(private val name: String) {
         public fun reset() { globalFields.clear(); maskedFields.clear(); minLevel = LogLevel.DEBUG }
     }
 
-    public fun debug(message: String, block: (LogFieldBuilder.() -> Unit)? = null) = log(LogLevel.DEBUG, message, null, block)
-    public fun info(message: String, block: (LogFieldBuilder.() -> Unit)? = null) = log(LogLevel.INFO, message, null, block)
-    public fun warn(message: String, block: (LogFieldBuilder.() -> Unit)? = null) = log(LogLevel.WARN, message, null, block)
-    public fun error(message: String, throwable: Throwable? = null, block: (LogFieldBuilder.() -> Unit)? = null) = log(LogLevel.ERROR, message, throwable, block)
+    /** Log at DEBUG level. */
+    public fun debug(message: String, block: (LogFieldBuilder.() -> Unit)? = null): Unit = log(LogLevel.DEBUG, message, null, block)
+    /** Log at INFO level. */
+    public fun info(message: String, block: (LogFieldBuilder.() -> Unit)? = null): Unit = log(LogLevel.INFO, message, null, block)
+    /** Log at WARN level. */
+    public fun warn(message: String, block: (LogFieldBuilder.() -> Unit)? = null): Unit = log(LogLevel.WARN, message, null, block)
+    /** Log at ERROR level. */
+    public fun error(message: String, throwable: Throwable? = null, block: (LogFieldBuilder.() -> Unit)? = null): Unit = log(LogLevel.ERROR, message, throwable, block)
 
     private fun log(level: LogLevel, message: String, throwable: Throwable?, block: (LogFieldBuilder.() -> Unit)?) {
         if (level.ordinal < minLevel.ordinal) return
         val fields = mutableMapOf<String, Any?>()
         fields.putAll(globalFields)
         if (block != null) { val fb = LogFieldBuilder(); fb.block(); fields.putAll(fb.fields) }
-        // Mask sensitive fields
         for (key in maskedFields) { if (fields.containsKey(key)) fields[key] = "***" }
 
         val json = buildString {
-            append("{")
-            append(""timestamp":"${Instant.now()}",")
-            append(""level":"$level",")
-            append(""logger":"${escapeJson(name)}",")
-            append(""message":"${escapeJson(message)}"")
-            for ((k, v) in fields) { append(","${escapeJson(k)}":${toJsonValue(v)}") }
+            append("{\"timestamp\":\"")
+            append(Instant.now())
+            append("\",\"level\":\"")
+            append(level)
+            append("\",\"logger\":\"")
+            append(escapeJson(name))
+            append("\",\"message\":\"")
+            append(escapeJson(message))
+            append("\"")
+            for ((k, v) in fields) {
+                append(",\"")
+                append(escapeJson(k))
+                append("\":")
+                append(toJsonValue(v))
+            }
             if (throwable != null) {
-                append(","error":{"type":"${throwable::class.simpleName}","message":"${escapeJson(throwable.message ?: "")}"}")
+                append(",\"error\":{\"type\":\"")
+                append(throwable::class.simpleName)
+                append("\",\"message\":\"")
+                append(escapeJson(throwable.message ?: ""))
+                append("\"}")
             }
             append("}")
         }
         output(json)
     }
 
-    private fun escapeJson(s: String): String = s.replace("\\", "\\\\").replace(""", "\\"").replace("\n", "\\n")
+    private fun escapeJson(s: String): String = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
     private fun toJsonValue(v: Any?): String = when (v) {
         null -> "null"
-        is String -> ""${escapeJson(v)}""
+        is String -> "\"${escapeJson(v)}\""
         is Number, is Boolean -> v.toString()
-        else -> ""${escapeJson(v.toString())}""
+        else -> "\"${escapeJson(v.toString())}\""
     }
 }
 
 /** Builder for structured log fields. */
 public class LogFieldBuilder {
-    internal val fields = mutableMapOf<String, Any?>()
+    internal val fields: MutableMap<String, Any?> = mutableMapOf()
     /** Add a field. */
     public infix fun String.to(value: Any?) { fields[this] = value }
 }
