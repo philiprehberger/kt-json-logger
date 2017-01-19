@@ -2,12 +2,9 @@
 
 [![CI](https://github.com/philiprehberger/kt-json-logger/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/kt-json-logger/actions/workflows/publish.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.philiprehberger/json-logger)](https://central.sonatype.com/artifact/com.philiprehberger/json-logger)
+[![License](https://img.shields.io/github/license/philiprehberger/kt-json-logger)](LICENSE)
 
 Structured JSON logging with context fields and sensitive field masking.
-
-## Requirements
-
-- Kotlin 1.9+ / Java 17+
 
 ## Installation
 
@@ -15,7 +12,7 @@ Structured JSON logging with context fields and sensitive field masking.
 
 ```kotlin
 dependencies {
-    implementation("com.philiprehberger:json-logger:0.1.0")
+    implementation("com.philiprehberger:json-logger:0.1.4")
 }
 ```
 
@@ -25,7 +22,7 @@ dependencies {
 <dependency>
     <groupId>com.philiprehberger</groupId>
     <artifactId>json-logger</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.4</version>
 </dependency>
 ```
 
