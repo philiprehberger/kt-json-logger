@@ -12,7 +12,7 @@ Structured JSON logging with context fields and sensitive field masking.
 
 ```kotlin
 dependencies {
-    implementation("com.philiprehberger:json-logger:0.1.4")
+    implementation("com.philiprehberger:json-logger:0.1.5")
 }
 ```
 
@@ -22,7 +22,7 @@ dependencies {
 <dependency>
     <groupId>com.philiprehberger</groupId>
     <artifactId>json-logger</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
 </dependency>
 ```
 
