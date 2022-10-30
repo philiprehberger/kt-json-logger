@@ -7,6 +7,8 @@ public fun jsonLogger(name: String): JsonLogger = JsonLogger(name)
 
 /** Structured JSON logger. */
 public class JsonLogger(private val name: String) {
+    private val contextFields = mutableMapOf<String, Any?>()
+
     public companion object {
         /** Minimum log level. */
         public var minLevel: LogLevel = LogLevel.DEBUG
@@ -32,10 +34,45 @@ public class JsonLogger(private val name: String) {
     /** Log at ERROR level. */
     public fun error(message: String, throwable: Throwable? = null, block: (LogFieldBuilder.() -> Unit)? = null): Unit = log(LogLevel.ERROR, message, throwable, block)
 
+    /**
+     * Creates a child logger with additional context fields baked in.
+     *
+     * All logs from the child logger will automatically include the given fields.
+     *
+     * @param fields key-value pairs to include in every log entry from this logger
+     * @return a new [JsonLogger] with the additional context
+     */
+    public fun withContext(vararg fields: Pair<String, Any?>): JsonLogger {
+        val child = JsonLogger(name)
+        child.contextFields.putAll(this.contextFields)
+        child.contextFields.putAll(fields)
+        return child
+    }
+
+    /**
+     * Logs at the given level and measures the duration of [block].
+     *
+     * The log entry includes a `duration_ms` field with the elapsed time in milliseconds.
+     *
+     * @param T the return type of the block
+     * @param level the log level
+     * @param message the log message
+     * @param block the block to measure
+     * @return the result of [block]
+     */
+    public fun <T> timed(level: LogLevel = LogLevel.INFO, message: String, block: () -> T): T {
+        val start = System.currentTimeMillis()
+        val result = block()
+        val duration = System.currentTimeMillis() - start
+        log(level, message, null) { "duration_ms" to duration }
+        return result
+    }
+
     private fun log(level: LogLevel, message: String, throwable: Throwable?, block: (LogFieldBuilder.() -> Unit)?) {
         if (level.ordinal < minLevel.ordinal) return
         val fields = mutableMapOf<String, Any?>()
         fields.putAll(globalFields)
+        fields.putAll(contextFields)
         if (block != null) { val fb = LogFieldBuilder(); fb.block(); fields.putAll(fb.fields) }
         for (key in maskedFields) { if (fields.containsKey(key)) fields[key] = "***" }
 

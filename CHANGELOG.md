@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 (2026-03-31)
+
+- Add `withContext()` to create child loggers with baked-in context fields
+- Add `timed()` to log with automatic duration measurement
+
 ## 0.1.7 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section
