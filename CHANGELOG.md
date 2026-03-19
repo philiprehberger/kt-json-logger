@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.3] - 2026-03-18
+
+- Fix smart quotes in test assertions
+
 ## [0.1.2] - 2026-03-18
 
 - Fix JSON string escaping in log output
